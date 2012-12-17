@@ -8,7 +8,8 @@
 'To Do
 '  * install client loop which waits for ccmsetup.exe should log once per minute
 '  * clientConfig should not honor ForceReinstall or ForceUninstall if the option exists and does not equal true.
-'	* forceUninstall should only uninstall right before the client is installed (because of a client health failure, or forceReinstall).
+'  * forceUninstall should only uninstall right before the client is installed (because of a client health failure, or forceReinstall).
+
 'known issues: (f)InWinPE will return true if the system is -not- in WinPE but an X: exists.
 
 
@@ -247,13 +248,22 @@ Sub Main
 		
 		'Check the current OS for legacy hotfixes
 		If(bContinue) Then
+			msg = "Checking if the client needs a legacy OS hotfix."
+	    WriteLogMsg msg, 1, 1, 0
 			bLegacyHotfixNeeded = False
 			bLegacyHotfixNeeded = CheckOSNeedsCertHotfix(configOptions)
 			If bLegacyHotfixNeeded = True Then
+	    	msg = "Installing the legacy OS certificate hotfix."
+	    	WriteLogMsg msg, 1, 1, 0
 	    	bResult = False
 	    	GetOSVersionAndArch OSVer, OSArch
-		 	  bResult = InstallLegacyOSHotfix(configOptions, OSVer, OSArch)
-				If bResult = True Then
+	    	msg = "Read OS Version as """ & OSVer & """ and OS Architecture as """ & OSArch & """."
+	    	WriteLogMsg msg, 1, 1, 0
+	    	bResult = InstallLegacyOSHotfix(configOptions, OSVer, OSArch)
+		 	  msg = "Re-checking legacy OS hotfix installation status after the install."
+	    	WriteLogMsg msg, 1, 1, 0
+		 	  bResult = CheckOSNeedsCertHotfix(configOptions)
+				If bResult = False Then
 					WriteLogMsg "OS Hotfix Installed", 1, 1, 0
 					bContinue = True
 				Else
@@ -265,7 +275,9 @@ Sub Main
 		
 		'obey forceUninstall
 		If configOptions.Exists(OPTION_FORCE_UNINSTALL) Then
-			bAction = UninstallClient(configOptions, parameters)
+			If configOptions.Item(OPTION_FORCE_UNINSTALL) = True Then
+				bAction = UninstallClient(configOptions, parameters)
+			End If
 		End If
 		
 		'obey forceReinstall
@@ -1981,28 +1993,36 @@ Function CheckOSNeedsCertHotfix(ByVal ConfigOptions)
 	Dim HotFixID
 	Dim bHotfixNeeded
 	Dim bLegacyOS
+	Dim msg
 	
 	Set WMIService = GetObject("winmgmts:\\.\root\cimv2")
 	Set colEngObj = WMIService.ExecQuery("SELECT * FROM Win32_QuickFixEngineering")
 	
+	bHotfixNeeded = true
+	
 	'check for legacy os
 	bLegacyOS = IsLegacyOS
 	If bLegacyOS = false Then
+		msg = "Client OS is newer than XP\2003 and does not need a certificate hotfix."
+		writelogmsg msg, 1, 1, 0
 		bHotfixNeeded = false
 	End If
 
 	'check if hotfix is installed if legacy OS
 	If bLegacyOS = True Then
+		bHotfixNeeded = true
 		For each engObj in colEngObj'
-			
 			If engObj.HotFixID = ConfigOptions.Item(CERTHOTFIXID) Then
-				Wscript.echo "The Cert HotFix Was found in the CLient records"
+				msg = "The certificate hotfix is installed on the client."
+				writelogmsg msg, 1, 1, 0
 				bHotfixNeeded = false
 				Exit For
-			Else
-				bHotfixNeeded = true
 			End If
 		Next
+		If bHotfixNeeded = True Then
+			msg = "The client OS is considered  ""legacy"", but does not have the following required certificate hotfix installed: " & ConfigOptions.Item(CERTHOTFIXID)
+			writelogmsg msg, 1, 1, 0
+		End If
 	End If
 	
 	CheckOSNeedsCertHotfix = bHotfixNeeded
@@ -2022,21 +2042,22 @@ Function InstallLegacyOSHotfix(ByVal ConfigOptions, ByVal OSVer, ByVal OSArch)
 	'Wscript.echo "The OSVer is " & OSVer
 	'Wscript.echo "The OSArch is " & OSArch
 	bContinue = true
+	
 	Select Case OSVer
 		Case "2003"
 			Select Case OSArch
-				Case "32"
+				Case 32
 					sHFXFilename = ConfigOptions.Item(OPTION_2003_X32_CERTHOTFIX)
-				Case "64"
+				Case 64
 					sHFXFilename = ConfigOptions.Item(OPTION_XP_2003_X64_CERTHOTFIX)
 				Case Else
 					sHFXFilename = False 
 			End Select
 		Case "xp"
 			Select Case OSArch
-				Case "32"
+				Case 32
 					sHFXFilename = ConfigOptions.Item(OPTION_XP_X32_CERTHOTFIX)
-				Case "64"
+				Case 64
 					sHFXFilename = ConfigOptions.Item(OPTION_XP_2003_X64_CERTHOTFIX)
 					
 				Case Else
@@ -2048,7 +2069,8 @@ Function InstallLegacyOSHotfix(ByVal ConfigOptions, ByVal OSVer, ByVal OSArch)
 	
 	
 	If sHFXFilename = False Then
-		msg = "ERROR, InstallLegacyHotfix, failed to determine hotfix fielname"
+		msg = "ERROR: Failed to determine hotfix filename. Check that the hotfix filename options are specified in your XML config file."
+		WriteLogMsg msg, 1, 1, 0
 		bContinue = False
 	End If
 	
@@ -2064,11 +2086,11 @@ Function InstallLegacyOSHotfix(ByVal ConfigOptions, ByVal OSVer, ByVal OSArch)
 		returnCode = g_WshShell.Run(commandLine, 0, true)
 		'Log output
 		If returnCode <> 0 Then
-		  WriteLogMsg MSG_INSTALLCLIENT_FAILED & returnCode, 3, 1, 0
-		  InstallClient = False
+		  Msg = "ERROR: Hotfix install returned error code: """ & returnCode & """."
+		  WriteLogMsg msg, 3, 1, 0
 		Else
-		  WriteLogMsg MSG_INSTALLCLIENT_SUCCESS, 1, 1, 0
-		  InstallClient = True
+		  Msg = "Hotfix install returned error code 0 (success)."
+		  WriteLogMsg msg, 1, 1, 0
 	  End If
 	End If
 	
@@ -2101,22 +2123,8 @@ Function RunClientInstall(ByVal commandLine)
  	Set ccmProcess = g_WshShell.Exec(commandLine)
  	ccmPID = ccmProcess.ProcessID
  	
- 	'Set ccmProcess = g_WshShell.Exec("notepad.exe")
- 	
- 	'wscript.echo "PID: " & ccmPID
- 	
   'loop to make sure ccmsetup.exe process ends before continuing on
- 	timeoutSeconds = 10 * 60 '10mins * 60 sec\min
-' 	wscript.echo "timeoutseconds: " & timeoutSeconds
-'	i = 0
-'	Do While ccmProcess.Status = 0
-'		If i > timeoutSeconds Then
-'			Exit Do
-'		End If
-'		wscript.sleep 1000
-'		i = i + 1
-'	Loop
-	
+ 	timeoutSeconds = 10 * 60 '10mins * 60 sec\min	
 	bSetupRunning = True
  	i = 0
  	Do while i < timeoutSeconds
