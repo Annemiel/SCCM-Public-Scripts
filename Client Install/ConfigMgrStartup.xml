@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<Startup>
+	<Option Name="ConfigLogPath">\\sccm-mth1\logs$\scripts\ConfigMgrStartup\</Option>
+	<Option Name="SiteCode">MTH</Option>
+	<Option Name="CacheSize">6144</Option>
+	<Option Name="AgentVersion">5.00.7711.0000</Option>
+	<Option Name="MinimumInterval">0</Option>
+	<Option Name="ClientLocation">\\ad1.asc.ohio-state.edu\netlogon\sccm-client\5.00.7711.0000</Option>
+	<Option Name="MaxLogFile">2048</Option>
+	<Option Name="AutoHotfix">\\ad1.asc.ohio-state.edu\netlogon\sccm-client\5.00.7711.0000</Option>
+	<Option Name="OtherInstallationProperties">SMSMP=https://sccm-mth1.math.osu.edu RESETKEYINFO=TRUE DNsSUFFIX=asc.ohio-state.edu</Option>
+	<Option Name="Delay">0</Option>
+	<Option Name="WMIScript">WMIDiag.vbs</Option>
+	<Option Name="WMIScriptAsynch">1</Option>
+	<Option Name="WMIScriptOptions">sms LogFilePath=C:\workingtemp\WMILogs</Option>
+	<ServiceCheck Name="BITS" State="Running" StartMode="Auto" Enforce="True" />
+	<ServiceCheck Name="winmgmt" State="Running" StartMode="Auto" Enforce="True" />
+	<ServiceCheck Name="wuauserv" State="Running" StartMode="Auto" Enforce="True" />
+	<ServiceCheck Name="lanmanserver" State="Running" StartMode="Auto" Enforce="True" />
+	<ServiceCheck Name="RpcSs" State="Running" StartMode="Auto" Enforce="True" />
+	<RegistryValueCheck Key="HKLM\SOFTWARE\Microsoft\Ole" Value="EnableDCOM" Expected="Y" Enforce="True" Type="REG_SZ"/>
+	<RegistryValueCheck Key="HKLM\SOFTWARE\Microsoft\Ole" Value="EnableRemoteConnect" Expected="Y" Enforce="False" Type="REG_SZ"/>
+	<RegistryValueCheck Key="HKLM\SOFTWARE\Microsoft\Ole" Value="LegacyAuthenticationLevel" Expected="2" Enforce="False" Type="REG_DWORD"/>
+	<RegistryValueCheck Key="HKLM\SOFTWARE\Microsoft\Ole" Value="LegacyImpersonationLevel" Expected="2" Enforce="False" Type="REG_DWORD"/>
+</Startup>

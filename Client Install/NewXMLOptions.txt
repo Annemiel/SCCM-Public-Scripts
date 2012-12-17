@@ -1,0 +1,46 @@
+New XML Options:
+
+Option:		ConfigLogPath
+Example:	\\fileserver\logs$
+Purpose:		Folder that the final log will be copied to. It will be named: scriptname + computername + timestamp
+
+Option:		LegacyOSCertificateHotfixFolder
+Example:	\\fileserver\publicSoftware\hotfix
+Purpose:		Folder where the legacy certificate hotfixes are stored.
+
+Option:		LegacyOSHotfix_XP_x32
+Example:	WindowsXP-KB968730-x86-ENU.exe
+Purpose:		Filename (without path) of the downloaded and extracted hotfix.
+
+Option:		LegacyOSHotfix_2003_x32
+Example:	WindowsServer2003-KB968730-x86-ENU.exe
+Purpose:		Filename (without path) of the downloaded and extracted hotfix.
+
+Option:		LegacyOSHotfix_XP2003_x64
+Example:	WindowsServer2003.WindowsXP-KB968730-x64-ENU.exe
+Purpose:		Filename (without path) of the downloaded and extracted hotfix.
+
+Option:		CertHotFixID
+Example:	KB968730
+Purpose:		KB number of the XP\2003 hotfix to install. This must be the same string as “hotfixID” listed the Powershell command (gwmi win32_QuickFixEngineering).
+
+Option:		ClientLocation
+Example:	\\fileserver\publicSoftware\sccmClient
+Purpose:		Path to the client installer and supporting files (ccmsetup.exe).
+
+Option:		AutoHotFix
+Example:	\\fileserver\publicSoftware\sccmClient
+Purpose:		path to the client hotfix. We assume that you put the hotfixes in <autoHotFixPath>\x64, and the <autoHotFixPath>\i386 (respectively).
+
+Option:		ForceReinstall
+Example:	True
+Purpose:		Forces reinstall of the client, even if the client appears to be healthy.
+
+Option:		ForceUninstall
+Example:	True
+Purpose:		Forces uninstall of the client before any other operations. Useful for client corruption issues where an uninstall is needed before a reinstall will work.
+
+Option:		OtherInstallationProperties
+Example:	/mp:https://yourmp.domain.com /usepkicert  SMSMP=https://yourmp.domain.com RESETKEYINFORMATION=TRUE DNSSUFFIX=asc.ohio-state.edu CCMCERTSEL="SubjectAttr:OU = your department"
+Purpose:		Any additional ccmsetup.exe parameters that you’d like to add.
+
