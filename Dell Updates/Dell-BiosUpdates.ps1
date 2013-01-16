@@ -14,12 +14,32 @@ $gMessages.Add(7,"Invalid BIOS Password")
 $gLogFile = $null
 $gLogFile = "C:\Windows\ccm\logs\BiosUpdates.log"
 
+Function write-openingBlock
+	{
+		$CS = Gwmi Win32_ComputerSystem -Comp "."
+		$computer = $CS.Name
+		$loggedInUser = $Env:username
+		$dateTime = Get-Date
+		
+		$msgs = $null
+		$msgs = @()
+		$msgs += "Running on " + $dateTime + " by " + $loggedInUser + " from " + $computer
+		$msgs += ""
+		$msgs += "___ STARTING WORK ___"
+		$msgs += ""
+		
+		Foreach($msg in $msgs)
+			{Write-Log $msg "white" 1}
+	}
+
 Function Write-Log($msg,$switches)
 	{
 		If($gLogFile -eq $null)
 			{}
 		Else
 			{Add-Content $gLogFile $msg}
+			
+		write-host $msg
 	}
 
 Function Get-BiosVersionsInRepo($hshRepo,$systemModel)
@@ -84,13 +104,43 @@ Function Upgrade-Bios($hshRepo,$systemModel,$curBiosVer,$password)
 		Start-Process $streamCmd $streamArgs
 		Sleep 3
 		
+		#change for certain machines
+		Switch($systemModel)
+			{
+				"Latitude e4300" {$cmdArgs = "-noreboot -nopause -forceit"}
+				default {$cmdArgs = "/s /p=" + $password}
+			}
+		
 		$cmd = $filePath
-		$cmdArgs = "/s /f /p=" + $password
+		$msg = "Running command: '" + $cmd + " " + $cmdArgs + "'."
+		Write-Log $msg
+		
 		$process = (Start-Process -PassThru -Wait -filepath $cmd -argumentlist $cmdArgs)
+		#$process = (Start-Process -PassThru -Wait -filepath $cmd) # -argumentlist $cmdArgs)
 		$returnCode = $process.ExitCode
 		
 		Return $returnCode
 	}
+
+write-openingBlock
+
+#==log about password supplied status
+$passOK = $false
+If($password -ne $null -and $password -ne "")
+	{
+		If($password.length -ge 4)
+			{$passOK = $true}
+		Else
+			{}
+	}
+If($passOK -eq $true)
+	{$msg = "Bios password has been specified and is at least 4 characters long."}
+Else
+	{$msg = "Bios password has -not- been specified or is at less than 4 characters long."}
+Write-Log $msg
+
+
+#==main
 
 $systemModel = $false
 $retCode = 0
@@ -116,11 +166,8 @@ If($systemModel -like "Optiplex*" -or $systemModel -like "Latitude*" -or $system
 		$arrModels = @()
 		$hshRepo.Keys | % {
 			If($hshRepo.Get_Item($_) -eq $True)
-				{
-					$arrModels += ($_.Split("\")[($_.Split("\").Count - 1)])
-				}
+				{$arrModels += ($_.Split("\")[($_.Split("\").Count - 1)])}
 			}
-		#$arrModels
 		
 		#check if current model is available in repo
 		If($arrModels -contains $systemModel)
