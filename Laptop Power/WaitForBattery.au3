@@ -1,3 +1,8 @@
+;WaitForBattery
+;John Puskar 01/16/2013
+;johnpuskar@gmail.com
+;windowsmasher.wordpress.com
+
 Dim $batterystatus, $objwmiservice_, $status, $battPercentage
 Dim $oBattery, $batteryInfo, $acPower
 Local $objwmiservice = ObjGet ('winmgmts:\\localhost\root\CIMV2')
