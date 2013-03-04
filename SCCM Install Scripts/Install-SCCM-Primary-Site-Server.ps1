@@ -1,3 +1,9 @@
+#John Puskar
+#johnpuskar@gmail.com
+#github: jpuskar
+#windowsmasher.wordpress.com
+
+
 ##Global vars (user-settable)
 $hshDrivesNeeded = $null
 $hshDrivesNeeded = @{"C" = 100;"D" = 30;"E" = 17;"F" = 100} #in GB
