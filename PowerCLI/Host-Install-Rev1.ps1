@@ -1,6 +1,8 @@
 # ESXi-Install-Script
 # johnpuskar@gmail.com
 # 02/02/2013
+#github: jpuskar
+#windowsmasher.wordpress.com
 
 #PowerCLI
 # Download -

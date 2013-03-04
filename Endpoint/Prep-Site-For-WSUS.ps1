@@ -6,6 +6,8 @@
 #           an input file.
 ###########################################################
 ## Heavily modified by John Puskar - johnpuskar@gmail.com
+#github: jpuskar
+#windowsmasher.wordpress.comzz
 ## Script no longer uses an input file.
 ## Script now properly parses subfolders (or, at least, it tries... :).
 

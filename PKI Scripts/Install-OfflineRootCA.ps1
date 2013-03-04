@@ -1,6 +1,12 @@
 
 # Vadims Podans (c) 2011
 # http://en-us.sysadmins.lv/
+
+#Heavily modified and refactored by John Puskar
+# johnpuskar@gmail.com
+# windowsmasher.wordpress.com
+
+
 Function Install-CertificationAuthority {
 	[CmdletBinding(
 		DefaultParameterSetName = 'NewKeySet',

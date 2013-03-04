@@ -1,3 +1,7 @@
+#John Puskar
+#johnpuskar@gmail.com
+#github: jpuskar
+#windowsmasher.wordpress.com
 Param([string]$password)
 
 

@@ -1,6 +1,7 @@
 #John Puskar
 #johnpuskar@gmail.com
 #github: jpuskar
+#windowsmasher.wordpress.com
 
 #This script searches for computer objects in and below the specified OU, then adds them to the specified group.
 $rootOU = "DC=chemistry,DC=ohio-state,DC=edu"
